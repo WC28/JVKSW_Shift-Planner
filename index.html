@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ระบบจัดตารางคิวเวร OPD ER MCATT ICOD-R</title>
+    <title>ระบบจัดตารางคิวเวร OPD ER MCATT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,10 +17,10 @@
       <header class="hero">
         <div>
           <p class="eyebrow">Shift Planner</p>
-          <h1>ระบบจัดตารางคิวเวร OPD ER นิติจิตเวช MCATT ICOD-R</h1>
+          <h1>ระบบจัดตารางคิวเวร OPD ER นิติจิตเวช MCATT</h1>
           <p class="hero-copy">
             ออกแบบสำหรับนักสังคมสงเคราะห์ 8 คน โดยแยกเวรประจำรายวันออกจาก
-            MCATT, I-COD-R, Audit และงานตรวจความถูกต้องของงาน เพื่อให้ตารางตรงงานจริงมากขึ้น
+            MCATT, Audit และงานตรวจความถูกต้องของงาน เพื่อให้ตารางตรงงานจริงมากขึ้น
           </p>
         </div>
         <div class="hero-card">
@@ -28,14 +28,14 @@
             <span class="stat-label">จำนวนเจ้าหน้าที่</span>
             <strong>8 คน</strong>
           </div>
-          <div class="stat">
-            <span class="stat-label">เวรประจำรายวัน</span>
-            <strong>2 จุด + 1 คิวสำรอง</strong>
-          </div>
-          <div class="stat">
-            <span class="stat-label">เวรพิเศษ</span>
-            <strong>MCATT / I-COD-R / Audit</strong>
-          </div>
+            <div class="stat">
+              <span class="stat-label">เวรประจำรายวัน</span>
+              <strong>2 จุด + 1 คิวสำรอง</strong>
+            </div>
+            <div class="stat">
+              <span class="stat-label">เวรพิเศษ</span>
+              <strong>MCATT / Audit / ตรวจงาน</strong>
+            </div>
         </div>
       </header>
 
@@ -94,8 +94,8 @@
                 <p>คิวหมุนตามคนที่มียอดออกงานสะสมน้อยกว่า</p>
               </article>
               <article class="shift-config-card">
-                <strong>I-COD-R</strong>
-                <p>กำหนดตามรอบศุกร์สัปดาห์ที่ 2 และ 4 หรือยึดแม่แบบอ้างอิง</p>
+                <strong>Audit / ตรวจงาน</strong>
+                <p>สรุปแยกในผลลัพธ์ ใช้ดูผู้รับผิดชอบรายเดือนและรายไตรมาส</p>
               </article>
             </div>
           </div>
@@ -111,6 +111,16 @@
               ช่อง “วันที่ไม่พร้อม” ใส่เลขวันคั่นด้วยจุลภาค เช่น 3, 4, 18, 29
             </p>
             <div id="staffContainer" class="staff-list"></div>
+          </div>
+
+          <div class="mcatt-section">
+            <div class="section-head">
+              <h3>ยอด MCATT สะสมที่ผ่านมา</h3>
+            </div>
+            <p class="hint">
+              ปรับยอดสะสมรายคนได้จากตารางนี้ ระบบจะใช้เป็นฐานเรียงคิว MCATT ในอนาคต
+            </p>
+            <div id="mcattContainer" class="mcatt-table-wrap"></div>
           </div>
 
           <div class="actions">
