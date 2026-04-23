@@ -9,6 +9,7 @@ const DEFAULT_STAFF = [
   "จุฑาพร",
   "วิฏฐิรษา",
 ];
+
 const APRIL_2026_REFERENCE = {
   audit: {
     label: "Audit ส่งเดือนเมษายน 2569",
@@ -25,19 +26,13 @@ const APRIL_2026_REFERENCE = {
   entries: [
     { dayNumber: 1, assignments: { OPD: "จุฑาพร", "ER / OPD เด็ก": "พงศธร" } },
     { dayNumber: 2, assignments: { OPD: "วิฏฐิรษา", "ER / OPD เด็ก": "กนกวรรณ" } },
-    {
-      dayNumber: 3,
-      assignments: { OPD: "ศิริพร", "ER / OPD เด็ก": "จุฑาพร" },
-    },
+    { dayNumber: 3, assignments: { OPD: "ศิริพร", "ER / OPD เด็ก": "จุฑาพร" } },
     { dayNumber: 7, assignments: { OPD: "กิตติมาพร", "ER / OPD เด็ก": "วิฏฐิรษา" } },
     { dayNumber: 8, assignments: { OPD: "นัทธมน", "ER / OPD เด็ก": "ศิริพร" } },
     { dayNumber: 9, assignments: { OPD: "สุภาภรณ์", "ER / OPD เด็ก": "กิตติมาพร" } },
     { dayNumber: 10, assignments: { OPD: "พงศธร", "ER / OPD เด็ก": "นัทธมน" } },
     { dayNumber: 16, assignments: { OPD: "กนกวรรณ", "ER / OPD เด็ก": "สุภาภรณ์" } },
-    {
-      dayNumber: 17,
-      assignments: { OPD: "จุฑาพร", "ER / OPD เด็ก": "พงศธร" },
-    },
+    { dayNumber: 17, assignments: { OPD: "จุฑาพร", "ER / OPD เด็ก": "พงศธร" } },
     { dayNumber: 20, assignments: { OPD: "วิฏฐิรษา", "ER / OPD เด็ก": "กนกวรรณ" } },
     { dayNumber: 21, assignments: { OPD: "ศิริพร", "ER / OPD เด็ก": "จุฑาพร" } },
     { dayNumber: 22, assignments: { OPD: "กิตติมาพร", "ER / OPD เด็ก": "วิฏฐิรษา" } },
@@ -49,6 +44,7 @@ const APRIL_2026_REFERENCE = {
     { dayNumber: 30, assignments: { OPD: "วิฏฐิรษา", "ER / OPD เด็ก": "กนกวรรณ" } },
   ],
 };
+
 const HOLIDAY_MAP = {
   "2026-04-06": "วันจักรี",
   "2026-04-13": "วันสงกรานต์",
@@ -69,6 +65,7 @@ const HOLIDAY_MAP = {
   "2026-12-10": "วันรัฐธรรมนูญ",
   "2026-12-30": "วันสิ้นปี",
 };
+
 const STORAGE_KEY = "opd-er-planner-snapshots-v2";
 
 const state = {
@@ -179,9 +176,12 @@ function renderMcattInputs(names = DEFAULT_STAFF, values = []) {
 }
 
 function syncMcattNames() {
-  const names = Array.from(staffContainer.querySelectorAll('[data-field="name"]')).map((input, index) => {
+  const names = Array.from(
+    staffContainer.querySelectorAll('[data-field="name"]')
+  ).map((input, index) => {
     return input.value.trim() || `เจ้าหน้าที่ ${index + 1}`;
   });
+
   const labels = Array.from(mcattContainer.querySelectorAll("[data-mcatt-name]"));
   labels.forEach((cell, index) => {
     cell.textContent = names[index] ?? `เจ้าหน้าที่ ${index + 1}`;
@@ -203,13 +203,19 @@ function parseDayList(value, maxDay) {
 
 function getStaffData(daysInMonth) {
   const cards = Array.from(staffContainer.querySelectorAll(".staff-card"));
-  const mcattValues = Array.from(mcattContainer.querySelectorAll("[data-mcatt-index]")).map((select) => {
+  const mcattValues = Array.from(
+    mcattContainer.querySelectorAll("[data-mcatt-index]")
+  ).map((select) => {
     return Number.parseInt(select.value, 10) || 0;
   });
+
   return cards.map((card, index) => {
-    const name = card.querySelector('[data-field="name"]').value.trim() || `เจ้าหน้าที่ ${index + 1}`;
+    const name =
+      card.querySelector('[data-field="name"]').value.trim() ||
+      `เจ้าหน้าที่ ${index + 1}`;
     const unavailableRaw = card.querySelector('[data-field="unavailable"]').value;
-    const carry = Number.parseInt(card.querySelector('[data-field="carry"]').value, 10) || 0;
+    const carry =
+      Number.parseInt(card.querySelector('[data-field="carry"]').value, 10) || 0;
     const mcattCarry = mcattValues[index] ?? 0;
 
     return {
@@ -229,7 +235,28 @@ function getStaffData(daysInMonth) {
   });
 }
 
+function getScheduleKey(year, month) {
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
+
+function getDateKey(year, month, day) {
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function getHolidayLabel(year, month, day) {
+  return HOLIDAY_MAP[getDateKey(year, month, day)] ?? null;
+}
+
 function isIncludedDay(date) {
+  const holidayLabel = getHolidayLabel(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate()
+  );
+  if (holidayLabel) {
+    return false;
+  }
+
   const dayOfWeek = date.getDay();
   if (dayOfWeek === 6 && !includeSaturday.checked) {
     return false;
@@ -242,60 +269,26 @@ function isIncludedDay(date) {
   return true;
 }
 
-function pickAssignee(candidates, dayNumber, unitName) {
-  const filtered = candidates
-    .map((person) => {
-      const consecutivePenalty =
-        avoidConsecutive.checked && person.lastAssignedDay === dayNumber - 1 ? 1000 : 0;
-      const specialLoad = person.special.monthlyCheck + person.special.audit * 2;
-
-      return {
-        person,
-        score:
-          person.carry * 10 +
-          person.totalAssigned * 10 +
-          specialLoad * 8 +
-          person.units[unitName] * 4 +
-          consecutivePenalty +
-          (person.lastAssignedDay === null ? 0 : person.lastAssignedDay / 100),
-      };
-    })
-    .sort((left, right) => left.score - right.score || left.person.id - right.person.id);
-
-  return filtered[0]?.person ?? null;
-}
-
-function getAvailablePeople(staffList, dayNumber, assignedToday) {
-  return staffList.filter((person) => {
-    return !assignedToday.has(person.id) && !person.unavailable.has(dayNumber);
-  });
-}
-
-function getNthWeekdayOfMonth(year, month, weekday, nth) {
-  let count = 0;
-  const daysInMonth = new Date(year, month, 0).getDate();
-  for (let day = 1; day <= daysInMonth; day += 1) {
-    const date = new Date(year, month - 1, day);
-    if (date.getDay() === weekday) {
-      count += 1;
-      if (count === nth) {
-        return day;
-      }
-    }
+function pickRotatingAssignee(staffList, assignedToday, dayNumber, startIndex) {
+  if (!staffList.length) {
+    return { person: null, nextIndex: startIndex };
   }
-  return null;
-}
 
-function getScheduleKey(year, month) {
-  return `${year}-${String(month).padStart(2, "0")}`;
-}
+  for (let offset = 0; offset < staffList.length; offset += 1) {
+    const candidateIndex = (startIndex + offset) % staffList.length;
+    const person = staffList[candidateIndex];
 
-function getDateKey(year, month, day) {
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
+    if (assignedToday.has(person.id) || person.unavailable.has(dayNumber)) {
+      continue;
+    }
 
-function getHolidayLabel(year, month, day) {
-  return HOLIDAY_MAP[getDateKey(year, month, day)] ?? null;
+    return {
+      person,
+      nextIndex: (candidateIndex + 1) % staffList.length,
+    };
+  }
+
+  return { person: null, nextIndex: startIndex };
 }
 
 function readSnapshots() {
@@ -319,9 +312,7 @@ function renderSnapshotOptions() {
 
   snapshotSelect.innerHTML = [
     '<option value="">เลือกข้อมูลย้อนหลัง</option>',
-    ...snapshots.map((item) => {
-      return `<option value="${item.id}">${item.label}</option>`;
-    }),
+    ...snapshots.map((item) => `<option value="${item.id}">${item.label}</option>`),
   ].join("");
 }
 
@@ -333,7 +324,9 @@ function collectFormState() {
     includeSaturday: includeSaturday.checked,
     includeSunday: includeSunday.checked,
     avoidConsecutive: avoidConsecutive.checked,
-    mcatt: Array.from(mcattContainer.querySelectorAll("[data-mcatt-index]")).map((select) => select.value),
+    mcatt: Array.from(mcattContainer.querySelectorAll("[data-mcatt-index]")).map(
+      (select) => select.value
+    ),
     staff: cards.map((card) => ({
       name: card.querySelector('[data-field="name"]').value,
       unavailable: card.querySelector('[data-field="unavailable"]').value,
@@ -358,6 +351,7 @@ function applyFormState(formState) {
   includeSaturday.checked = Boolean(formState.includeSaturday);
   includeSunday.checked = Boolean(formState.includeSunday);
   avoidConsecutive.checked = formState.avoidConsecutive !== false;
+
   renderStaffInputs();
   renderMcattInputs(DEFAULT_STAFF, formState.mcatt ?? []);
 
@@ -372,6 +366,7 @@ function applyFormState(formState) {
     card.querySelector('[data-field="unavailable"]').value = person.unavailable ?? "";
     card.querySelector('[data-field="carry"]').value = person.carry ?? "0";
   });
+
   syncMcattNames();
 }
 
@@ -453,35 +448,40 @@ function buildReferenceSchedule(year, month, staffList, reference) {
     reference.referenceNote,
     "Google Calendar ในภาพถูกใช้เพื่อดูรายการที่มีการสลับแลกเวรภายหลัง ไม่ใช่ต้นฉบับตั้งเวร",
     "นิติจิตเวชยังคงเป็นคิวเตรียมพร้อมเผื่อมีเคส",
+    "วันหยุดราชการที่อยู่ในระบบจะไม่ถูกนำมาจัดเวร",
   ];
 
-  const schedule = reference.entries.map((entry) => {
-    const currentDate = new Date(year, month - 1, entry.dayNumber);
-    const row = {
-      dayNumber: entry.dayNumber,
-      weekday: currentDate.toLocaleDateString("th-TH", { weekday: "long" }),
-      assignments: {},
-      unfilled: [],
-    };
+  const schedule = reference.entries
+    .filter((entry) => !getHolidayLabel(year, month, entry.dayNumber))
+    .map((entry) => {
+      const currentDate = new Date(year, month - 1, entry.dayNumber);
+      const row = {
+        dayNumber: entry.dayNumber,
+        weekday: currentDate.toLocaleDateString("th-TH", { weekday: "long" }),
+        assignments: {},
+        unfilled: [],
+      };
 
-    ROUTINE_UNITS.forEach((unitName) => {
-      row.assignments[unitName] = entry.assignments[unitName] ?? null;
+      ROUTINE_UNITS.forEach((unitName) => {
+        row.assignments[unitName] = entry.assignments[unitName] ?? null;
+      });
+
+      Object.entries(row.assignments).forEach(([unitName, name]) => {
+        const person = staffList.find((item) => item.name === name);
+        if (!person) {
+          warnings.push(
+            `ไม่พบชื่อ ${name} ในรายชื่อเจ้าหน้าที่สำหรับเวร ${unitName} วันที่ ${entry.dayNumber}`
+          );
+          return;
+        }
+
+        person.totalAssigned += 1;
+        person.lastAssignedDay = entry.dayNumber;
+        person.units[unitName] += 1;
+      });
+
+      return row;
     });
-
-    Object.entries(row.assignments).forEach(([unitName, name]) => {
-      const person = staffList.find((item) => item.name === name);
-      if (!person) {
-        warnings.push(`ไม่พบชื่อ ${name} ในรายชื่อเจ้าหน้าที่สำหรับเวร ${unitName} วันที่ ${entry.dayNumber}`);
-        return;
-      }
-
-      person.totalAssigned += 1;
-      person.lastAssignedDay = entry.dayNumber;
-      person.units[unitName] += 1;
-    });
-
-    return row;
-  });
 
   const monthlyCheckAssignee = staffList.find(
     (person) => person.name === reference.monthlyCheck.current
@@ -533,9 +533,11 @@ function buildSchedule(year, month, staffList) {
   const warnings = [];
   const assumptions = [
     "กำหนดให้เวรประจำรายวันมี 2 จุดคือ OPD และ ER / OPD เด็ก",
+    "เวรประจำรายวันจะเรียงตามลำดับรายชื่อแบบวนต่อเนื่องทีละวัน",
     "กำหนดให้นิติจิตเวชเป็นคิวเตรียมพร้อมรายวัน ไม่ใช่เวรที่มีงานแน่นอนทุกวัน",
     "กำหนดให้เดือน Audit เป็นเดือนสุดท้ายของไตรมาส คือ มีนาคม มิถุนายน กันยายน ธันวาคม",
     "กำหนดให้งานตรวจความถูกต้องของงานเป็นผู้รับผิดชอบ 1 คนต่อเดือนแบบไม่ผูกกับวันที่ตายตัว",
+    "วันหยุดราชการที่อยู่ในระบบจะไม่ถูกนำมาจัดเวร และคิวจะไม่ขยับในวันหยุด",
   ];
 
   const monthlyCheckAssignee = pickSpecialAssignee(staffList, "monthlyCheck");
@@ -561,6 +563,10 @@ function buildSchedule(year, month, staffList) {
     }
   }
 
+  const unitCursor = Object.fromEntries(
+    ROUTINE_UNITS.map((unitName) => [unitName, 0])
+  );
+
   for (let dayNumber = 1; dayNumber <= daysInMonth; dayNumber += 1) {
     const currentDate = new Date(year, month - 1, dayNumber);
     if (!isIncludedDay(currentDate)) {
@@ -576,15 +582,21 @@ function buildSchedule(year, month, staffList) {
     };
 
     ROUTINE_UNITS.forEach((unitName) => {
-      const available = getAvailablePeople(staffList, dayNumber, assignedToday);
+      const result = pickRotatingAssignee(
+        staffList,
+        assignedToday,
+        dayNumber,
+        unitCursor[unitName]
+      );
+      const assignee = result.person;
 
-      const assignee = pickAssignee(available, dayNumber, unitName);
       if (!assignee) {
         row.assignments[unitName] = null;
         row.unfilled.push(unitName);
         return;
       }
 
+      unitCursor[unitName] = result.nextIndex;
       assignedToday.add(assignee.id);
       assignee.totalAssigned += 1;
       assignee.lastAssignedDay = dayNumber;
@@ -608,14 +620,12 @@ function buildSchedule(year, month, staffList) {
     special: person.special,
   }));
 
-  const mcattQueue = buildMcattQueue(staffList);
-
   return {
     schedule,
     warnings,
     assumptions,
     totals,
-    mcattQueue,
+    mcattQueue: buildMcattQueue(staffList),
     forensicQueue: buildForensicQueue(staffList),
     monthlyCheck: monthlyCheckAssignee?.name ?? null,
     monthlyCheckLabel: monthlyCheckAssignee ? "ผู้รับผิดชอบประจำเดือน" : null,
@@ -791,7 +801,7 @@ function renderCalendar(schedule, year, month) {
             <span>${day}</span>
             <span class="calendar-weekday">${weekday}</span>
           </div>
-          ${holidayLabel ? `<div class="calendar-item holiday">${holidayLabel}</div>` : ""}
+          ${holidayLabel ? `<div class="calendar-item holiday"><strong>วันหยุด</strong>: ${holidayLabel}</div>` : ""}
         </div>
       `);
       continue;
@@ -944,7 +954,7 @@ function exportCalendarPng() {
     ].filter(Boolean);
 
     lines.forEach((line, index) => {
-      const colors = ["#fde1dc", "#e2e6fb", "#f9edbf", "#dcefed"];
+      const colors = ["#fde1dc", "#e2e6fb"];
       ctx.fillStyle = colors[index] ?? "#eef2f7";
       ctx.fillRect(x + 12, lineY - 18, cellWidth - 24, 24);
       ctx.fillStyle = "#1f2430";
@@ -972,7 +982,10 @@ function exportCalendarPdf() {
 
 function renderBalance(totals) {
   balanceWrap.innerHTML = totals
-    .sort((left, right) => right.totalAssigned - left.totalAssigned || left.name.localeCompare(right.name))
+    .sort(
+      (left, right) =>
+        right.totalAssigned - left.totalAssigned || left.name.localeCompare(right.name)
+    )
     .map((person) => {
       const unitTags = ROUTINE_UNITS.map((unitName) => {
         return `<span>${unitName}: ${person.units[unitName]}</span>`;
@@ -1001,7 +1014,9 @@ function toCsv(schedule) {
     return [
       row.dayNumber,
       row.weekday,
-      ...ROUTINE_UNITS.map((unitName) => row.assignments[unitName] ?? "ยังไม่สามารถจัดเวรได้"),
+      ...ROUTINE_UNITS.map(
+        (unitName) => row.assignments[unitName] ?? "ยังไม่สามารถจัดเวรได้"
+      ),
     ];
   });
 
@@ -1066,6 +1081,7 @@ function loadSnapshot() {
   state.summary = entry.summary;
   state.year = entry.year;
   state.month = entry.month;
+
   renderSummary(entry.summary);
   renderWarnings(entry.summary.warnings ?? []);
   renderAssumptions(entry.summary.assumptions ?? []);
@@ -1073,6 +1089,7 @@ function loadSnapshot() {
   renderCalendar(entry.summary.schedule, entry.year, entry.month);
   renderTable(entry.summary.schedule);
   renderBalance(entry.summary.totals ?? []);
+
   exportBtn.disabled = false;
   saveSnapshotBtn.disabled = false;
   savePngBtn.disabled = false;
@@ -1096,23 +1113,30 @@ function resetForm() {
   state.summary = null;
   state.year = null;
   state.month = null;
+
   renderStaffInputs();
   renderMcattInputs();
+
   includeSaturday.checked = false;
   includeSunday.checked = false;
+
   summaryCards.innerHTML = "";
   renderWarnings([]);
   renderAssumptions([]);
   specialWrap.innerHTML = "";
   balanceWrap.innerHTML = "";
+
   calendarWrap.className = "calendar-wrap empty-state";
   calendarWrap.textContent = 'กด "สร้างตารางเวร" เพื่อดูปฏิทินรายเดือน';
+
   tableWrap.className = "table-wrap empty-state";
   tableWrap.textContent = 'กด "สร้างตารางเวร" เพื่อเริ่มใช้งาน';
+
   exportBtn.disabled = true;
   saveSnapshotBtn.disabled = true;
   savePngBtn.disabled = true;
   savePdfBtn.disabled = true;
+
   setViewMode("calendar");
 }
 
@@ -1122,6 +1146,7 @@ function loadAprilReference() {
   includeSaturday.checked = false;
   includeSunday.checked = false;
   avoidConsecutive.checked = true;
+
   resetForm();
   yearInput.value = 2026;
   monthInput.value = 4;
@@ -1153,10 +1178,12 @@ function generateSchedule() {
   renderCalendar(summary.schedule, year, month);
   renderTable(summary.schedule);
   renderBalance(summary.totals);
+
   exportBtn.disabled = summary.schedule.length === 0;
   saveSnapshotBtn.disabled = summary.schedule.length === 0;
   savePngBtn.disabled = summary.schedule.length === 0;
   savePdfBtn.disabled = summary.schedule.length === 0;
+
   setViewMode("calendar");
 }
 
