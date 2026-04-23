@@ -157,7 +157,8 @@ input[type="text"] {
   background: #fff;
 }
 
-input:focus {
+input:focus,
+select:focus {
   outline: 2px solid rgba(13, 92, 99, 0.2);
   border-color: var(--accent);
 }
@@ -192,7 +193,7 @@ input:focus {
 
 .staff-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(180px, 1fr) 120px 140px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   padding: 14px;
   border-radius: 18px;
@@ -559,6 +560,10 @@ tbody tr:nth-child(even) {
   .layout {
     grid-template-columns: 1fr;
   }
+
+  .staff-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -645,3 +650,4 @@ tbody tr:nth-child(even) {
     print-color-adjust: exact;
   }
 }
+
