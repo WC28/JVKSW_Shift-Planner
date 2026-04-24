@@ -496,6 +496,17 @@ button:disabled {
   font-weight: 700;
 }
 
+.holiday-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(31, 111, 120, 0.18);
+  color: #0f6b70;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
 .calendar-weekday {
   font-size: 0.8rem;
   color: var(--muted);
@@ -517,6 +528,10 @@ button:disabled {
 .calendar-item.er {
   background: #e1e7ff;
   border-left: 4px solid #5f74d8;
+}
+
+.calendar-item.standby {
+  background: rgba(13, 92, 99, 0.12);
 }
 
 .calendar-item.holiday {
@@ -689,4 +704,5 @@ tbody tr:nth-child(even) {
     print-color-adjust: exact;
   }
 }
+
 
